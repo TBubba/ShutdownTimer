@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this._bStart = new System.Windows.Forms.Button();
             this._cbShutdownMode = new System.Windows.Forms.ComboBox();
             this._lTimeMode = new System.Windows.Forms.Label();
@@ -56,7 +57,7 @@
             this._cbShutdownMode.Name = "_cbShutdownMode";
             this._cbShutdownMode.Size = new System.Drawing.Size(98, 21);
             this._cbShutdownMode.TabIndex = 1;
-            this._cbShutdownMode.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this._cbShutdownMode_KeyPress);
+            this._cbShutdownMode.SelectedIndexChanged += new System.EventHandler(this._cbShutdownMode_SelectedIndexChanged);
             // 
             // _lTimeMode
             // 
@@ -91,12 +92,15 @@
             // 
             // _cbTimeMode
             // 
+            this._cbTimeMode.BackColor = System.Drawing.SystemColors.Window;
             this._cbTimeMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this._cbTimeMode.ForeColor = System.Drawing.SystemColors.WindowText;
             this._cbTimeMode.FormattingEnabled = true;
             this._cbTimeMode.Location = new System.Drawing.Point(105, 76);
             this._cbTimeMode.Name = "_cbTimeMode";
             this._cbTimeMode.Size = new System.Drawing.Size(98, 21);
             this._cbTimeMode.TabIndex = 2;
+            this._cbTimeMode.SelectedIndexChanged += new System.EventHandler(this._cbTimeMode_SelectedIndexChanged);
             // 
             // MainForm
             // 
@@ -110,6 +114,7 @@
             this.Controls.Add(this._cbShutdownMode);
             this.Controls.Add(this._bStart);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.Text = "Shutdown Timer";

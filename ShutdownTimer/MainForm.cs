@@ -38,7 +38,11 @@ namespace ShutdownTimer
         private Stopwatch _watch; // For checking ow much time has passed
 
         private bool _timerOn; // If the timer is on
-        private TimeSpan _time; // The timespan related to the timer (count down, wait unil and so on)
+        private TimeSpan _time; // The time the user entered before starting the timer
+        private TimeSpan _timeStart; // The span of time from the beginning of the countdown (or any other timemode) to the end
+
+        private ShutdownMode _shutdownMode; // Current shutdown mode
+        private TimeMode _timeMode; // Current time mode
 
         public MainForm()
         {
@@ -118,6 +122,7 @@ namespace ShutdownTimer
         private void StartTimer()
         {
             TimeSpan time;
+            FormatTimeError error = FormatTime(_rtbTime.Text, out time);
             switch (FormatTime(_rtbTime.Text, out time))
             {
                 case FormatTimeError.None:
@@ -126,6 +131,20 @@ namespace ShutdownTimer
                     _timer.Start(); // Start timer
                     _watch.Restart(); // Start watch
                     _timerOn = true; // Flag timer as on
+
+                    switch (_timeMode)
+                    {
+                        case TimeMode.CountDown:
+                            _timeStart = _time;
+                            break;
+
+                        case TimeMode.WaitUntil:
+                            TimeSpan timeLeft = _time - DateTime.Now.TimeOfDay;
+                            if (timeLeft < TimeSpan.Zero)
+                                timeLeft = new TimeSpan(24, 0, 0) + timeLeft;
+                            _timeStart = timeLeft;
+                            break;
+                    }
 
                     // Lock componentes
                     _rtbTime.ReadOnly = true;
@@ -151,7 +170,10 @@ namespace ShutdownTimer
                     break;
 
                 default:
+#if DEBUG
                     throw new Exception("Forgot to add the \"FormatTimeError\" exception in the switch in \"_bStart_Click\".");
+#endif
+                    break;
             }
         }
 
@@ -161,6 +183,13 @@ namespace ShutdownTimer
             _timer.Stop(); // Stop timer
             _watch.Stop(); // Stop watch
             _timerOn = false; // Flag timer as off
+
+            if (_timeMode == TimeMode.WaitUntil) // Check if the time mode was wait until
+            {
+                // Reset timer (to the typed time)
+                _rtbTime.Text = FormatTimeSpan(_time);
+                _rtbTime.SelectionAlignment = HorizontalAlignment.Center;
+            }
 
             // Unlock componentes
             _rtbTime.ReadOnly = false;
@@ -175,9 +204,12 @@ namespace ShutdownTimer
             // Stop timer
             StopTimer();
 
+            //
+            _rtbTime.Text = "bye :)";
+            _rtbTime.SelectionAlignment = HorizontalAlignment.Center;
+
             // Select "shutdown mode"
-            ShutdownMode sm = (ShutdownMode)_cbShutdownMode.SelectedIndex;
-            switch (sm)
+            switch (_shutdownMode)
             {
                 case ShutdownMode.Hibernate:
 #if !DEBUG
@@ -277,28 +309,16 @@ namespace ShutdownTimer
         // Events
         private void _timer_Tick(object sender, EventArgs e)
         {
-            TimeMode tm = (TimeMode)_cbTimeMode.SelectedIndex;
-            switch (tm)
-            {
-                case TimeMode.CountDown:
-                    TimeSpan timeLeft = _time - _watch.Elapsed; // Calculate time left
+            // Counts down
+            TimeSpan timeLeft = _timeStart - _watch.Elapsed;
 
-                    // Update (visual) timer
-                    _rtbTime.Text = FormatTimeSpan(timeLeft);
-                    _rtbTime.SelectionAlignment = HorizontalAlignment.Center;
+            // Update (visual) timer
+            _rtbTime.Text = FormatTimeSpan(timeLeft);
+            _rtbTime.SelectionAlignment = HorizontalAlignment.Center;
 
-                    // Check if time is up
-                    if (timeLeft < TimeSpan.Zero)
-                        TimerEnd();
-
-                    break;
-
-                case TimeMode.WaitUntil:
-
-
-
-                    break;
-            }
+            // Check if time is up
+            if (timeLeft < TimeSpan.Zero)
+                TimerEnd();
         }
 
         private void _bStart_Click(object sender, EventArgs e)
@@ -310,11 +330,14 @@ namespace ShutdownTimer
                 StartTimer();
         }
 
-        private void _cbShutdownMode_KeyPress(object sender, KeyPressEventArgs e)
+        private void _cbTimeMode_SelectedIndexChanged(object sender, EventArgs e)
         {
-            // 
-            if (_timerOn)
-                e.Handled = true;
+            _timeMode = (TimeMode)_cbTimeMode.SelectedIndex;
+        }
+
+        private void _cbShutdownMode_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            _shutdownMode = (ShutdownMode)_cbShutdownMode.SelectedIndex;
         }
     }
 }
