@@ -5,10 +5,10 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("ShutdownTimer")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("Shutdown Timer")]
+[assembly: AssemblyDescription("Lightweight shutdown timer")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Jesper (Bubba) Gustafsson")]
 [assembly: AssemblyProduct("ShutdownTimer")]
 [assembly: AssemblyCopyright("Copyright ©  2015")]
 [assembly: AssemblyTrademark("")]
