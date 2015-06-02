@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using System.Text;
+using System.Drawing;
 
 namespace ShutdownTimer
 {
@@ -24,16 +25,6 @@ namespace ShutdownTimer
             WaitUntil
         }
 
-        public enum FormatTimeError
-        {
-            None,
-            NoNumberAfterSeperator,
-            NonNumericalSymbol,
-            TooManyNumbersAfterSeperator,
-            TooManySeperators,
-            TimeOverMax
-        }
-
         private Timer _timer; // For using the tick event
         private Stopwatch _watch; // For checking ow much time has passed
 
@@ -47,6 +38,12 @@ namespace ShutdownTimer
         public MainForm()
         {
             InitializeComponent();
+
+            // Get language
+            Text = Language.Title; // Get title
+            _bStart.Text = Language.TimerButtonStart; // Get button text
+            _lShutdownMode.Text = Language.ShutdownModeText; // Get shutdown mode text
+            _lTimeMode.Text = Language.TimeModeText; // Get time mode text
 
             // Set up timers
             _timer = new Timer();
@@ -88,44 +85,13 @@ namespace ShutdownTimer
             return newText.ToString();
         }
 
-        private FormatTimeError FormatTime(string time, out TimeSpan timespan)
-        {
-            timespan = new TimeSpan();
-            long mils = 0;
-
-            string[] splits = time.Split(':');
-            int length = splits.Length;
-            if (length > 3) // Check if there are too many seperators
-                return FormatTimeError.TooManySeperators;
-
-            for (int i = length - 1; i >= 0; i--) // Loop through all splits
-            {
-                if (splits[i].Length == 0) // Check if there is anything after the seperator
-                    return FormatTimeError.NoNumberAfterSeperator;
-
-                if (!IsDigitsOnly(splits[i])) // Check if it is a valid number
-                    return FormatTimeError.NonNumericalSymbol;
-
-                if (splits[i].Length > 2) // Check if there are too many numbers after the seperator
-                    return FormatTimeError.TooManyNumbersAfterSeperator;
-
-                mils += (long)Math.Pow(60, (length - 1) - i) * long.Parse(splits[i]); // Add time
-            }
-
-            if (mils > (int)new TimeSpan(24, 0, 0).TotalSeconds) // Check if the timespan is too large
-                return FormatTimeError.TimeOverMax;
-
-            timespan = new TimeSpan(mils * 10000000L); // Create timespan
-            return FormatTimeError.None; // Success (no error)
-        }
-
         private void StartTimer()
         {
             TimeSpan time;
-            FormatTimeError error = FormatTime(_rtbTime.Text, out time);
-            switch (FormatTime(_rtbTime.Text, out time))
+            Time.FormatTimeError error = Time.StringToTimeSpan(_rtbTime.Text, out time);
+            switch (Time.StringToTimeSpan(_rtbTime.Text, out time))
             {
-                case FormatTimeError.None:
+                case Time.FormatTimeError.None:
                     // Timer
                     _time = time; // Set time
                     _timer.Start(); // Start timer
@@ -150,23 +116,31 @@ namespace ShutdownTimer
                     _rtbTime.ReadOnly = true;
                     _cbTimeMode.Enabled = false;
 
-                    //
-                    _bStart.Text = "Stop";
+                    // Change button text
+                    _bStart.Text = Language.TimerButtonStop;
+
+                    // Clear message box (from error messages)
+                    ClearMessage();
                     break;
 
-                case FormatTimeError.NonNumericalSymbol:
+                case Time.FormatTimeError.NonNumericalSymbol:
+                    SetErrorMessage(Language.ErrorMessageNonNumericalSymbol);
                     break;
 
-                case FormatTimeError.NoNumberAfterSeperator:
+                case Time.FormatTimeError.NoNumberAfterSeperator:
+                    SetErrorMessage(Language.ErrorMessageNoNumberAfterSeperator);
                     break;
 
-                case FormatTimeError.TooManySeperators:
+                case Time.FormatTimeError.TooManySeperators:
+                    SetErrorMessage(Language.ErrorMessageTooManySeperators);
                     break;
 
-                case FormatTimeError.TooManyNumbersAfterSeperator:
+                case Time.FormatTimeError.TooManyNumbersAfterSeperator:
+                    SetErrorMessage(Language.ErrorMessageTooManyNumbersAfterSeperator);
                     break;
 
-                case FormatTimeError.TimeOverMax:
+                case Time.FormatTimeError.TimeOverMax:
+                    SetErrorMessage(Language.ErrorMessageTimeOverMax);
                     break;
 
                 default:
@@ -187,7 +161,7 @@ namespace ShutdownTimer
             if (_timeMode == TimeMode.WaitUntil) // Check if the time mode was wait until
             {
                 // Reset timer (to the typed time)
-                _rtbTime.Text = FormatTimeSpan(_time);
+                _rtbTime.Text = Time.TimeSpanToString(_time);
                 _rtbTime.SelectionAlignment = HorizontalAlignment.Center;
             }
 
@@ -196,7 +170,7 @@ namespace ShutdownTimer
             _cbTimeMode.Enabled = true;
 
             //
-            _bStart.Text = "Start";
+            _bStart.Text = Language.TimerButtonStart;
         }
 
         private void TimerEnd()
@@ -205,7 +179,7 @@ namespace ShutdownTimer
             StopTimer();
 
             //
-            _rtbTime.Text = "bye :)";
+            _rtbTime.Text = Language.TimerFinishedMessage;
             _rtbTime.SelectionAlignment = HorizontalAlignment.Center;
 
             // Select "shutdown mode"
@@ -249,17 +223,6 @@ namespace ShutdownTimer
             }
         }
 
-        private bool IsDigitsOnly(string str)
-        {
-            foreach (char c in str)
-            {
-                if (c < '0' || c > '9')
-                    return false;
-            }
-
-            return true;
-        }
-
         private void RemoveSelection(Object obj)
         {
             RichTextBox textbox = obj as RichTextBox;
@@ -269,41 +232,18 @@ namespace ShutdownTimer
             }
         }
 
-        private string FormatTimeSpan(TimeSpan time)
+        private void SetErrorMessage(string message)
         {
-            string text = "";
+            _lInfoMessage.Text = message; // Set text
+            _lInfoMessage.BackColor = Color.Red; // Set color
 
-            // Hours
-            if (time.Hours > 0)
-            {
-                if (time.Hours > 9)
-                    text += time.Hours;
-                else
-                    text += "0" + time.Hours;
-            }
+            _lInfoMessage.TextAlign = ContentAlignment.MiddleCenter; // Align text to center
+        }
 
-            // Minutes
-            if (time.Minutes > 0)
-            {
-                if (text != "")
-                    text += ":";
-
-                if (time.Minutes > 9)
-                    text += time.Minutes;
-                else
-                    text += "0" + time.Minutes;
-            }
-
-            // Seconds
-            if (text != "")
-                text += ":";
-
-            if (time.Seconds > 9 || text == "")
-                text += time.Seconds;
-            else
-                text += "0" + time.Seconds;
-
-            return text;
+        private void ClearMessage()
+        {
+            _lInfoMessage.Text = ""; // Remove text
+            _lInfoMessage.BackColor = SystemColors.Control; // Reset color
         }
 
         // Events
@@ -313,7 +253,7 @@ namespace ShutdownTimer
             TimeSpan timeLeft = _timeStart - _watch.Elapsed;
 
             // Update (visual) timer
-            _rtbTime.Text = FormatTimeSpan(timeLeft);
+            _rtbTime.Text = Time.TimeSpanToString(timeLeft);
             _rtbTime.SelectionAlignment = HorizontalAlignment.Center;
 
             // Check if time is up

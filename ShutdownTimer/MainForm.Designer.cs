@@ -34,6 +34,7 @@
             this._lTimeMode = new System.Windows.Forms.Label();
             this._lShutdownMode = new System.Windows.Forms.Label();
             this._rtbTime = new System.Windows.Forms.RichTextBox();
+            this._lInfoMessage = new System.Windows.Forms.Label();
             this._cbTimeMode = new ShutdownTimer.FakeComboBox();
             this.SuspendLayout();
             // 
@@ -41,7 +42,7 @@
             // 
             this._bStart.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this._bStart.Font = new System.Drawing.Font("Microsoft Sans Serif", 21F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this._bStart.Location = new System.Drawing.Point(2, 102);
+            this._bStart.Location = new System.Drawing.Point(2, 110);
             this._bStart.Name = "_bStart";
             this._bStart.Size = new System.Drawing.Size(201, 44);
             this._bStart.TabIndex = 3;
@@ -53,7 +54,7 @@
             // 
             this._cbShutdownMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this._cbShutdownMode.FormattingEnabled = true;
-            this._cbShutdownMode.Location = new System.Drawing.Point(3, 75);
+            this._cbShutdownMode.Location = new System.Drawing.Point(3, 83);
             this._cbShutdownMode.Name = "_cbShutdownMode";
             this._cbShutdownMode.Size = new System.Drawing.Size(98, 21);
             this._cbShutdownMode.TabIndex = 1;
@@ -61,7 +62,7 @@
             // 
             // _lTimeMode
             // 
-            this._lTimeMode.Location = new System.Drawing.Point(105, 60);
+            this._lTimeMode.Location = new System.Drawing.Point(105, 68);
             this._lTimeMode.Name = "_lTimeMode";
             this._lTimeMode.Size = new System.Drawing.Size(98, 13);
             this._lTimeMode.TabIndex = 9;
@@ -69,7 +70,7 @@
             // 
             // _lShutdownMode
             // 
-            this._lShutdownMode.Location = new System.Drawing.Point(3, 59);
+            this._lShutdownMode.Location = new System.Drawing.Point(3, 67);
             this._lShutdownMode.Name = "_lShutdownMode";
             this._lShutdownMode.Size = new System.Drawing.Size(98, 13);
             this._lShutdownMode.TabIndex = 10;
@@ -90,13 +91,20 @@
             this._rtbTime.TabIndex = 0;
             this._rtbTime.Text = "00:05:00";
             // 
+            // _lInfoMessage
+            // 
+            this._lInfoMessage.Location = new System.Drawing.Point(-3, 56);
+            this._lInfoMessage.Name = "_lInfoMessage";
+            this._lInfoMessage.Size = new System.Drawing.Size(211, 12);
+            this._lInfoMessage.TabIndex = 11;
+            // 
             // _cbTimeMode
             // 
             this._cbTimeMode.BackColor = System.Drawing.SystemColors.Window;
             this._cbTimeMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this._cbTimeMode.ForeColor = System.Drawing.SystemColors.WindowText;
             this._cbTimeMode.FormattingEnabled = true;
-            this._cbTimeMode.Location = new System.Drawing.Point(105, 76);
+            this._cbTimeMode.Location = new System.Drawing.Point(105, 84);
             this._cbTimeMode.Name = "_cbTimeMode";
             this._cbTimeMode.Size = new System.Drawing.Size(98, 21);
             this._cbTimeMode.TabIndex = 2;
@@ -106,7 +114,8 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(205, 147);
+            this.ClientSize = new System.Drawing.Size(205, 156);
+            this.Controls.Add(this._lInfoMessage);
             this.Controls.Add(this._cbTimeMode);
             this.Controls.Add(this._rtbTime);
             this.Controls.Add(this._lShutdownMode);
@@ -130,6 +139,7 @@
         private System.Windows.Forms.Label _lShutdownMode;
         private System.Windows.Forms.RichTextBox _rtbTime;
         private FakeComboBox _cbTimeMode;
+        private System.Windows.Forms.Label _lInfoMessage;
     }
 }
 
