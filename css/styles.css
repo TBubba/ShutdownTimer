@@ -574,6 +574,25 @@ section img {
   max-width: 100%;
 }
 
+section li.shutdown {
+  list-style-image:url('../img/icon/shutdown.png');
+}
+section li.restart {
+  list-style-image:url('../img/icon/restart.png');
+}
+section li.hibernate {
+  list-style-image:url('../img/icon/hibernate.png');
+}
+section li.sleep {
+  list-style-image:url('../img/icon/sleep.png');
+}
+section li.logout {
+  list-style-image:url('../img/icon/logout.png');
+}
+section li.lock {
+  list-style-image:url('../img/icon/lock.png');
+}
+
 blockquote {
   border-left: 1px solid #ffcc00;
   margin: 0;
