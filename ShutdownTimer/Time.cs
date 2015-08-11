@@ -1,12 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace ShutdownTimer
 {
     internal static class Time
     {
+        /// <summary>
+        /// Type of error that can occur while formatting time
+        /// (.None if none occured)
+        /// </summary>
         public enum FormatTimeError
         {
             None,
@@ -17,7 +18,11 @@ namespace ShutdownTimer
             TimeOverMax
         }
 
-        // TimeSpan <-> String
+        /// <summary>
+        /// Converts a TimeSpan into a string
+        /// </summary>
+        /// <param name="time">The TimeSpan to convert</param>
+        /// <returns>A string with the value of the converted TimeSpan</returns>
         internal static string TimeSpanToString(TimeSpan time)
         {
             string text = "";
@@ -55,6 +60,13 @@ namespace ShutdownTimer
             return text;
         }
 
+        /// <summary>
+        /// Converts a string to a TimeSpan
+        /// </summary>
+        /// <param name="time">The string to convert</param>
+        /// <param name="timespan">The TimeSpan to get the value of the converted string</param>
+        /// <returns>Any eventual error that have occured 
+        /// (FormatTimeError.None if no errors occured - otherwise the first error to occur will be returned)</returns>
         internal static FormatTimeError StringToTimeSpan(string time, out TimeSpan timespan)
         {
             timespan = new TimeSpan();
@@ -86,12 +98,18 @@ namespace ShutdownTimer
             return FormatTimeError.None; // Success (no error)
         }
 
-        // Check if string contains digits only
+        /// <summary>
+        /// Checks if a string contains digits only (0-9)
+        /// </summary>
+        /// <param name="str">The string to check</param>
+        /// <returns>Whether or not the string contains digits only (0-9)</returns>
         internal static bool IsDigitsOnly(string str)
         {
-            foreach (char c in str)
+            int length = str.Length;
+            for (int i = 0; i < length; i++)
             {
-                if (c < '0' || c > '9')
+                char c = str[i];
+                if (c < '0' || c > '9') // If char is non-numeric (if not 0-9)
                     return false;
             }
 

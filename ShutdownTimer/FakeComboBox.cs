@@ -3,7 +3,10 @@ using System.Windows.Forms;
 
 namespace ShutdownTimer
 {
-    class FakeComboBox : ComboBox
+    /// <summary>
+    /// Same as ComboBox, but will be "grayed out" when not enabled
+    /// </summary>
+    public class FakeComboBox : ComboBox
     {
         private PictureBox _fake;
         private Color _backColor;

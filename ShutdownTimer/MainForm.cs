@@ -4,223 +4,80 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using System.Text;
 using System.Drawing;
+using ShutdownTimer.TimerEvents;
 
 namespace ShutdownTimer
 {
     public partial class MainForm : Form
     {
-        public enum ShutdownMode
-        {
-            Shutdown,
-            Restart,
-            Hibernate,
-            Sleep,
-            Logoff,
-            Lock
-        }
-
-        public enum TimeMode
-        {
-            CountDown,
-            WaitUntil
-        }
-
-        private Timer _timer; // For using the tick event
-        private Stopwatch _watch; // For checking ow much time has passed
-
-        private bool _timerOn; // If the timer is on
-        private TimeSpan _time; // The time the user entered before starting the timer
-        private TimeSpan _timeStart; // The span of time from the beginning of the countdown (or any other timemode) to the end
+        private MainTimer _timer; // For using the tick event
 
         private ShutdownMode _shutdownMode; // Current shutdown mode
         private TimeMode _timeMode; // Current time mode
 
+        private Language _language; // Current 
+
+        // Constructor(s)
         public MainForm()
         {
             InitializeComponent();
 
-            // Get language
-            Text = Language.Title; // Get title
-            _bStart.Text = Language.TimerButtonStart; // Get button text
-            _lShutdownMode.Text = Language.ShutdownModeText; // Get shutdown mode text
-            _lTimeMode.Text = Language.TimeModeText; // Get time mode text
-
-            // Set up timers
-            _timer = new Timer();
-            _timer.Interval = 10;
-            _timer.Tick += new EventHandler(_timer_Tick);
-
-            _watch = new Stopwatch();
-
-            // Align text
-            _rtbTime.SelectionAlignment = HorizontalAlignment.Center;
-            _lShutdownMode.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            _lTimeMode.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // Set up timer
+            _timer = new MainTimer();
+            _timer.OnTimerTick += OnTimerTick;
+            _timer.OnCountdownComplete += OnCountdownComplete;
+            _timer.OnTimerStarted += OnTimerStarted;
+            _timer.OnTimerStopped += OnTimerStopped;
 
             // Set up shutdown mode list
             int length = Enum.GetNames(typeof(ShutdownMode)).Length;
             for (int i = 0; i < length; i++)
-                _cbShutdownMode.Items.Add(FormatEnumName(((ShutdownMode)i).ToString()));
+                _cbShutdownMode.Items.Add("");
             _cbShutdownMode.SelectedIndex = 0;
 
             // Set up time mode list
             length = Enum.GetNames(typeof(TimeMode)).Length;
             for (int i = 0; i < length; i++)
-                _cbTimeMode.Items.Add(FormatEnumName(((TimeMode)i).ToString()));
+                _cbTimeMode.Items.Add("");
             _cbTimeMode.SelectedIndex = 0;
-        }
 
-        private string FormatEnumName(string name)
-        {
-            if (string.IsNullOrWhiteSpace(name))
-                return "";
-            StringBuilder newText = new StringBuilder(name.Length * 2);
-            newText.Append(name[0]);
-            for (int i = 1; i < name.Length; i++)
-            {
-                if (char.IsUpper(name[i]) && name[i - 1] != ' ')
-                    newText.Append(' ');
-                newText.Append(name[i]);
-            }
-            return newText.ToString();
-        }
+            // Load language
+            _language = new Language();
+            LoadLanguage(new Language());
 
-        private void StartTimer()
-        {
-            TimeSpan time;
-            Time.FormatTimeError error = Time.StringToTimeSpan(_rtbTime.Text, out time);
-            switch (Time.StringToTimeSpan(_rtbTime.Text, out time))
-            {
-                case Time.FormatTimeError.None:
-                    // Timer
-                    _time = time; // Set time
-                    _timer.Start(); // Start timer
-                    _watch.Restart(); // Start watch
-                    _timerOn = true; // Flag timer as on
-
-                    switch (_timeMode)
-                    {
-                        case TimeMode.CountDown:
-                            _timeStart = _time;
-                            break;
-
-                        case TimeMode.WaitUntil:
-                            TimeSpan timeLeft = _time - DateTime.Now.TimeOfDay;
-                            if (timeLeft < TimeSpan.Zero)
-                                timeLeft = new TimeSpan(24, 0, 0) + timeLeft;
-                            _timeStart = timeLeft;
-                            break;
-                    }
-
-                    // Lock componentes
-                    _rtbTime.ReadOnly = true;
-                    _cbTimeMode.Enabled = false;
-
-                    // Change button text
-                    _bStart.Text = Language.TimerButtonStop;
-
-                    // Clear message box (from error messages)
-                    ClearMessage();
-                    break;
-
-                case Time.FormatTimeError.NonNumericalSymbol:
-                    SetErrorMessage(Language.ErrorMessageNonNumericalSymbol);
-                    break;
-
-                case Time.FormatTimeError.NoNumberAfterSeperator:
-                    SetErrorMessage(Language.ErrorMessageNoNumberAfterSeperator);
-                    break;
-
-                case Time.FormatTimeError.TooManySeperators:
-                    SetErrorMessage(Language.ErrorMessageTooManySeperators);
-                    break;
-
-                case Time.FormatTimeError.TooManyNumbersAfterSeperator:
-                    SetErrorMessage(Language.ErrorMessageTooManyNumbersAfterSeperator);
-                    break;
-
-                case Time.FormatTimeError.TimeOverMax:
-                    SetErrorMessage(Language.ErrorMessageTimeOverMax);
-                    break;
-
-                default:
-#if DEBUG
-                    throw new Exception("Forgot to add the \"FormatTimeError\" exception in the switch in \"_bStart_Click\".");
-#endif
-                    break;
-            }
-        }
-
-        private void StopTimer()
-        {
-            // Timer
-            _timer.Stop(); // Stop timer
-            _watch.Stop(); // Stop watch
-            _timerOn = false; // Flag timer as off
-
-            if (_timeMode == TimeMode.WaitUntil) // Check if the time mode was wait until
-            {
-                // Reset timer (to the typed time)
-                _rtbTime.Text = Time.TimeSpanToString(_time);
-                _rtbTime.SelectionAlignment = HorizontalAlignment.Center;
-            }
-
-            // Unlock componentes
-            _rtbTime.ReadOnly = false;
-            _cbTimeMode.Enabled = true;
-
-            //
-            _bStart.Text = Language.TimerButtonStart;
-        }
-
-        private void TimerEnd()
-        {
-            // Stop timer
-            StopTimer();
-
-            //
-            _rtbTime.Text = Language.TimerFinishedMessage;
+            // Align text
             _rtbTime.SelectionAlignment = HorizontalAlignment.Center;
+            _lShutdownMode.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            _lTimeMode.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+        }
 
-            // Select "shutdown mode"
-            switch (_shutdownMode)
-            {
-                case ShutdownMode.Hibernate:
-#if !DEBUG
-                    Shut.Hibernate();
-#endif
-                    break;
+        //
+        private void LoadLanguage(Language lang)
+        {
+            // Copy inputted language
+            _language.CopyFrom(lang);
 
-                case ShutdownMode.Lock:
-#if !DEBUG
-                    Shut.Lock();
-#endif
-                    break;
+            // Refresh everything that uses language
+            RefreshLanguage();
+        }
+        private void RefreshLanguage()
+        {
+            Text = _language.Title; // Get title
+            _bStart.Text = _language.TimerButtonStart; // Get button text
+            _lShutdownMode.Text = _language.ShutdownModeText; // Get shutdown mode text
+            _lTimeMode.Text = _language.TimeModeText; // Get time mode text
 
-                case ShutdownMode.Logoff:
-#if !DEBUG
-                    Shut.Logoff();
-#endif
-                    break;
+            // Set all shutdown modes' names
+            _cbShutdownMode.Items[0] = _language.ShutdownModeShutdown;
+            _cbShutdownMode.Items[1] = _language.ShutdownModeRestart;
+            _cbShutdownMode.Items[2] = _language.ShutdownModeHibernate;
+            _cbShutdownMode.Items[3] = _language.ShutdownModeSleep;
+            _cbShutdownMode.Items[4] = _language.ShutdownModeLogoff;
+            _cbShutdownMode.Items[5] = _language.ShutdownModeLock;
 
-                case ShutdownMode.Restart:
-#if !DEBUG
-                    Shut.Restart();
-#endif
-                    break;
-
-                case ShutdownMode.Shutdown:
-#if !DEBUG
-                    Shut.Shutdown();
-#endif
-                    break;
-
-                case ShutdownMode.Sleep:
-#if !DEBUG
-                    Shut.Sleep();
-#endif
-                    break;
-            }
+            // Set all time modes' names
+            _cbTimeMode.Items[0] = _language.TimeModeCountdown;
+            _cbTimeMode.Items[1] = _language.TimeModeWaitUntil;
         }
 
         private void RemoveSelection(Object obj)
@@ -246,25 +103,102 @@ namespace ShutdownTimer
             _lInfoMessage.BackColor = SystemColors.Control; // Reset color
         }
 
-        // Events
-        private void _timer_Tick(object sender, EventArgs e)
+        //
+        private void StartTimer()
         {
-            // Counts down
-            TimeSpan timeLeft = _timeStart - _watch.Elapsed;
+            // Format inputted time
+            TimeSpan time;
+            Time.FormatTimeError error = Time.StringToTimeSpan(_rtbTime.Text, out time);
 
-            // Update (visual) timer
-            _rtbTime.Text = Time.TimeSpanToString(timeLeft);
-            _rtbTime.SelectionAlignment = HorizontalAlignment.Center;
+            // 
+            switch (Time.StringToTimeSpan(_rtbTime.Text, out time))
+            {
+                case Time.FormatTimeError.None:
+                    // Start timer
+                    _timer.StartTimer(time, _timeMode);
+                    break;
 
-            // Check if time is up
-            if (timeLeft < TimeSpan.Zero)
-                TimerEnd();
+                case Time.FormatTimeError.NonNumericalSymbol:
+                    SetErrorMessage(_language.ErrorMessageNonNumericalSymbol);
+                    break;
+
+                case Time.FormatTimeError.NoNumberAfterSeperator:
+                    SetErrorMessage(_language.ErrorMessageNoNumberAfterSeperator);
+                    break;
+
+                case Time.FormatTimeError.TooManySeperators:
+                    SetErrorMessage(_language.ErrorMessageTooManySeperators);
+                    break;
+
+                case Time.FormatTimeError.TooManyNumbersAfterSeperator:
+                    SetErrorMessage(_language.ErrorMessageTooManyNumbersAfterSeperator);
+                    break;
+
+                case Time.FormatTimeError.TimeOverMax:
+                    SetErrorMessage(_language.ErrorMessageTimeOverMax);
+                    break;
+
+                default:
+#if DEBUG
+                    throw new Exception("Forgot to add the \"FormatTimeError\" exception in the switch in \"_bStart_Click\".");
+#endif
+                    break;
+            }
+        }
+        private void StopTimer()
+        {
+            //
+            _timer.StopTimer();
         }
 
+        // Timer Events
+        private void OnTimerTick(object sender, TimerTickEventArgs e)
+        {
+            // Update (visual) timer
+            _rtbTime.Text = Time.TimeSpanToString(e.TimeLeft);
+            _rtbTime.SelectionAlignment = HorizontalAlignment.Center;
+        }
+        private void OnCountdownComplete(object sender, TimerCountdownCompleteEventArgs e)
+        {
+            //
+            _rtbTime.Text = _language.TimerFinishedMessage;
+            _rtbTime.SelectionAlignment = HorizontalAlignment.Center;
+        }
+        private void OnTimerStarted(object sender, TimerStartedEventArgs e)
+        {
+            // Lock componentes
+            _rtbTime.ReadOnly = true;
+            _cbTimeMode.Enabled = false;
+
+            // Change button text
+            _bStart.Text = _language.TimerButtonStop;
+
+            // Clear message box (from error messages)
+            ClearMessage();
+        }
+        private void OnTimerStopped(object sender, TimerStoppedEventArgs e)
+        {
+            // Check if the time mode was wait until
+            if (_timeMode == TimeMode.WaitUntil)
+            {
+                // Reset timer (to the typed time)
+                _rtbTime.Text = Time.TimeSpanToString(_timer.EnteredTime);
+                _rtbTime.SelectionAlignment = HorizontalAlignment.Center;
+            }
+
+            // Unlock componentes
+            _rtbTime.ReadOnly = false;
+            _cbTimeMode.Enabled = true;
+
+            //
+            _bStart.Text = _language.TimerButtonStart;
+        }
+
+        // Winforms Events
         private void _bStart_Click(object sender, EventArgs e)
         {
             // Toggle the timer (start/stop)
-            if (_timerOn) // If the timer is on
+            if (_timer.IsOn) // If the timer is on
                 StopTimer();
             else
                 StartTimer();
@@ -278,6 +212,7 @@ namespace ShutdownTimer
         private void _cbShutdownMode_SelectedIndexChanged(object sender, EventArgs e)
         {
             _shutdownMode = (ShutdownMode)_cbShutdownMode.SelectedIndex;
+            _timer.SetShutdownMode(_shutdownMode);
         }
     }
 }
