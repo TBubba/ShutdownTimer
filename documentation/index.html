@@ -26,7 +26,7 @@
       <div class="downloads">
         <span>Download Latest:</span>
         <ul>
-          <li><a href="../ver/ShutdownTimer_002x86.zip" class="button">x86</a></li>
+          <li><a href="../ver/ShutdownTimer_003x86.zip" class="button">x86</a></li>
           <li><a href="#" class="button">x64</a></li>
         </ul>
       </div>
@@ -40,6 +40,7 @@
           <li><a href="index.html">Documentation</a></li>
           <ul id="current-page">
           </ul>
+          <li><a href="../changelog/index.html">Changelog</a></li>
           <li><a href="../contribute/index.html">Contribute</a></li>
         </ul>
       </nav>
@@ -70,7 +71,7 @@
           <li class="restart"><b>Restart</b></li>
           <li class="hibernate"><b>Hibernate (Power saving mode)</b></li>
           <li class="sleep"><b>Sleep</b></li>
-          <li class="logout"><b>Log out</b></li>
+          <li class="logout"><b>Log off</b></li>
           <li class="lock"><b>Lock</b></li>
         </ul>
 
@@ -93,6 +94,26 @@
 
         <p>The Start/Stop button is very straight forward. When pressing the <u>start</u> button, the timer starts counting down.
         And when pressing the <u>stop</u> button, the timer stops.</p>
+
+        <h2 id="command-line-arguments">
+          <a name="command-line-arguments" class="anchor" href="#command-line-arguments"><span class="octicon octicon-link"></span></a>Command-Line Arguments</h2>
+
+        <p><b>Note:</b> Replace <i>arg</i> with any argument listed below.<br>
+        <b>Format:</b> <code>ShutdownTimer [-sm arg] [-tm arg] [-t arg]</code><br> 
+        <b>Arguments:</b><br> 
+        &nbsp;&nbsp;&nbsp;&nbsp;<b>-sm</b> <i>(selects the initial shutdown mode)</i><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>s</b> <i>or</i> <b>shutdown</b><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>r</b> <i>or</i> <b>restart</b><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>h</b> <i>or</i> <b>hibernate</b><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>sl</b> <i>or</i> <b>sleep</b><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>l</b> <i>or</i> <b>lock</b><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>lo</b> <i>or</i> <b>logoff</b><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<b>-tm</b> <i>(selects the initial time mode)</i><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>c</b> <i>or</i> <b>countdown</b><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>w</b> <i>or</i> <b>waituntil</b><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<b>-t</b> <i>(sets the initial inputted time)</i><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>hh:mm:ss</b> (same format as the timer)<br>
+        </p>
       </section>
       <footer>
         <p>Project maintained by <a href="https://github.com/TBubba">TBubba</a></p>
