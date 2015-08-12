@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using ShutdownTimer.Options;
 
 namespace ShutdownTimer
@@ -36,17 +34,17 @@ namespace ShutdownTimer
                     "s=shutdown, r=restart, sl=sleep,\n" +
                     "l=lock, lo=logoff, h=hibernate",
                     (string v) => {
-                        if (v == "s")
+                        if (v == "s" || v == "shutdown")
                             sdm = ShutdownMode.Shutdown;
-                        else if (v == "r")
+                        else if (v == "r" || v == "restart")
                             sdm = ShutdownMode.Restart;
-                        else if (v == "sl")
+                        else if (v == "sl" || v == "sleep")
                             sdm = ShutdownMode.Sleep;
-                        else if (v == "l")
+                        else if (v == "l" || v == "lock")
                             sdm = ShutdownMode.Lock;
-                        else if (v == "lo")
+                        else if (v == "lo" || v == "logoff")
                             sdm = ShutdownMode.Logoff;
-                        else if (v == "h")
+                        else if (v == "h" || v == "hibernate")
                             sdm = ShutdownMode.Hibernate;
                         else
                             {/* INVALID SHUTDOWN MODE */}
@@ -57,17 +55,15 @@ namespace ShutdownTimer
                     (string v) => {
                         TimeSpan t;
                         if (Time.StringToTimeSpan(v, out t) == Time.FormatTimeError.None)
-                        {
                             time = t;
-                        }
                     }},
                 { "tm|timemode=",
                     "name of time mode.\n"+
-                    "c=countdown, w=wait until",
+                    "c=countdown, w=waituntil",
                     (string v) => {
-                        if (v == "c")
+                        if (v == "c" || v == "countdown")
                             tm = TimeMode.CountDown;
-                        else if (v == "w")
+                        else if (v == "w" || v == "waituntil")
                             tm = TimeMode.WaitUntil;
                         else
                         { /* INVALID TIME MODE */}
