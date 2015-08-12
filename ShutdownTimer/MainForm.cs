@@ -12,10 +12,7 @@ namespace ShutdownTimer
     {
         private MainTimer _timer; // For using the tick event
 
-        private ShutdownMode _shutdownMode; // Current shutdown mode
-        private TimeMode _timeMode; // Current time mode
-
-        private Language _language; // Current 
+        private Language _language; // Current language
 
         // Constructor(s)
         public MainForm()
@@ -23,11 +20,13 @@ namespace ShutdownTimer
             InitializeComponent();
 
             // Set up timer
-            _timer = new MainTimer();
-            _timer.OnTimerTick += OnTimerTick;
+            _timer = new MainTimer(); // Create the timer
+            _timer.OnTimerTick += OnTimerTick; // Set up events
             _timer.OnCountdownComplete += OnCountdownComplete;
             _timer.OnTimerStarted += OnTimerStarted;
             _timer.OnTimerStopped += OnTimerStopped;
+            _timer.OnShutdownModeChanged += OnShutdownModeChanged;
+            _timer.OnTimeModeChanged += OnTimeModeChanged;
 
             // Set up shutdown mode list
             int length = Enum.GetNames(typeof(ShutdownMode)).Length;
@@ -44,6 +43,13 @@ namespace ShutdownTimer
             // Load language
             _language = new Language();
             LoadLanguage(new Language());
+
+            // Apply command line arguments
+            if (CLArgs.PTime.HasValue) // Time
+                _rtbTime.Text = Time.TimeSpanToString(CLArgs.PTime.Value);
+
+            // Apply command line arguments to timer
+            _timer.ApplyCommandLineArguments();
 
             // Align text
             _rtbTime.SelectionAlignment = HorizontalAlignment.Center;
@@ -80,7 +86,7 @@ namespace ShutdownTimer
             _cbTimeMode.Items[1] = _language.TimeModeWaitUntil;
         }
 
-        private void RemoveSelection(Object obj)
+        private void RemoveSelection(object obj)
         {
             RichTextBox textbox = obj as RichTextBox;
             if (textbox != null)
@@ -115,7 +121,7 @@ namespace ShutdownTimer
             {
                 case Time.FormatTimeError.None:
                     // Start timer
-                    _timer.StartTimer(time, _timeMode);
+                    _timer.StartTimer(time);
                     break;
 
                 case Time.FormatTimeError.NonNumericalSymbol:
@@ -179,7 +185,7 @@ namespace ShutdownTimer
         private void OnTimerStopped(object sender, TimerStoppedEventArgs e)
         {
             // Check if the time mode was wait until
-            if (_timeMode == TimeMode.WaitUntil)
+            if (_timer.CurrentTimeMode == TimeMode.WaitUntil)
             {
                 // Reset timer (to the typed time)
                 _rtbTime.Text = Time.TimeSpanToString(_timer.EnteredTime);
@@ -192,6 +198,14 @@ namespace ShutdownTimer
 
             //
             _bStart.Text = _language.TimerButtonStart;
+        }
+        private void OnShutdownModeChanged(object sender, ShutdownModeEventArgs e)
+        {
+            _cbShutdownMode.SelectedIndex = (int)e.Mode;
+        }
+        private void OnTimeModeChanged(object sender, TimeModeEventArgs e)
+        {
+            _cbTimeMode.SelectedIndex = (int)e.Mode;
         }
 
         // Winforms Events
@@ -206,13 +220,12 @@ namespace ShutdownTimer
 
         private void _cbTimeMode_SelectedIndexChanged(object sender, EventArgs e)
         {
-            _timeMode = (TimeMode)_cbTimeMode.SelectedIndex;
+            _timer.SetTimeMode((TimeMode)_cbTimeMode.SelectedIndex);
         }
 
         private void _cbShutdownMode_SelectedIndexChanged(object sender, EventArgs e)
         {
-            _shutdownMode = (ShutdownMode)_cbShutdownMode.SelectedIndex;
-            _timer.SetShutdownMode(_shutdownMode);
+            _timer.SetShutdownMode((ShutdownMode)_cbShutdownMode.SelectedIndex);
         }
     }
 }

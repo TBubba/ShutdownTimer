@@ -101,6 +101,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CLArgs.cs" />
     <Compile Include="FakeComboBox.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -111,11 +112,14 @@
     <Compile Include="MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Options\Options.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Shut.cs" />
     <Compile Include="Time.cs" />
     <Compile Include="MainTimer.cs" />
+    <Compile Include="TimerEvents\TimeModeEventArgs.cs" />
+    <Compile Include="TimerEvents\ShutdownModeEventArgs.cs" />
     <Compile Include="TimerEvents\TimerCountdownCompleteEventArgs.cs" />
     <Compile Include="TimerEvents\TimerTickEventArgs.cs" />
     <Compile Include="TimerEvents\TimerStartedEventArgs.cs" />

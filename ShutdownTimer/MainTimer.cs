@@ -42,6 +42,7 @@ namespace ShutdownTimer
         {
             get { return _timerOn; }
         }
+
         internal TimeSpan EnteredTime
         {
             get { return _time; }
@@ -51,12 +52,20 @@ namespace ShutdownTimer
             get { return _timeStart; }
         }
 
+        internal ShutdownMode CurrentShutdownMode
+        { get { return _shutdownMode; } }
+        internal TimeMode CurrentTimeMode
+        { get { return _timeMode; } }
+
         // Events
         internal event EventHandler<TimerTickEventArgs> OnTimerTick; // Whenever the timer ticks
         internal event EventHandler<TimerCountdownCompleteEventArgs> OnCountdownComplete; // Whenever the countdown is complete
 
         internal event EventHandler<TimerStartedEventArgs> OnTimerStarted; // Whenever the timer starts
         internal event EventHandler<TimerStoppedEventArgs> OnTimerStopped; // Whenever the timer stops
+
+        internal event EventHandler<ShutdownModeEventArgs> OnShutdownModeChanged; // Whenever the shutdownmode is changed
+        internal event EventHandler<TimeModeEventArgs> OnTimeModeChanged; // Whenever the timemode is changed
 
         // Constructor(s)
         internal MainTimer()
@@ -70,16 +79,46 @@ namespace ShutdownTimer
         }
 
         //
-        internal void SetShutdownMode(ShutdownMode mode)
+        internal void ApplyCommandLineArguments()
         {
-
+            // Apply command line arguments
+            if (CLArgs.PShutdownMode.HasValue) // Shutdown Mode
+                SetShutdownMode(CLArgs.PShutdownMode.Value);
+            if (CLArgs.PTimeMode.HasValue) // Time Mode
+                SetTimeMode(CLArgs.PTimeMode.Value);
         }
 
-        internal void StartTimer(TimeSpan time, TimeMode mode)
+        internal void SetShutdownMode(ShutdownMode mode)
         {
-            _time = time; // Set time
-            _timeMode = mode; // Set time mode
+            if (_shutdownMode == mode)
+                return;
 
+            _shutdownMode = mode;
+
+            // Call event
+            CallEvent<ShutdownModeEventArgs>(OnShutdownModeChanged,
+                this, new ShutdownModeEventArgs(_shutdownMode));
+        }
+        internal void SetTimeMode(TimeMode mode)
+        {
+            if (_timeMode == mode)
+                return;
+
+            _timeMode = mode;
+
+            // Call event
+            CallEvent<TimeModeEventArgs>(OnTimeModeChanged,
+                this, new TimeModeEventArgs(_timeMode));
+        }
+
+        internal void StartTimer(TimeSpan time)
+        {
+            _time = time;
+
+            StartTimer();
+        }
+        internal void StartTimer()
+        {
             // Start timer
             _timer.Start(); // Start timer
             _watch.Restart(); // Start watch
